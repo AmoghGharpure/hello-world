@@ -1,3 +1,6 @@
+//Could not complete the logic
+
+
 let myIsland1, myIsland2;
 let myBoat;
 let myMan =[1,2,3];
