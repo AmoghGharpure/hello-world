@@ -1,0 +1,194 @@
+let myIsland1, myIsland2;
+let myBoat;
+let myMan =[1,2,3];
+let myMonster=[1,2,3];
+var colour_button;
+
+
+function setup() {
+    createCanvas(800, 500);
+    background(131,238,255);
+   start(); 
+   colour_button=createButton('Start the boat');
+   colour_button.position(360,80);
+   colour_button.mousePressed (boat.move);
+    
+  }
+  
+  
+function draw() {
+    frameRate(60);
+    //background(131,238,255);
+    myIsland1.display();
+    myIsland2.display();
+    myBoat.display();
+    myMan[1].display();
+    myMan[2].display();
+    myMan[3].display();
+    myMonster[1].display();
+    myMonster[2].display();
+    myMonster[3].display();
+    
+  /*
+  myBoat.move(270);//this is pos1 of boat
+  myBoat.move(530);//this is pos2 of boat
+
+  myMan[1].move(240);// this is seat 1 on boat near island1
+  myMan[2].move(290); //this is seat 2 on boat near island1
+  myMan[1].move(500); // this is seat 1 on boat near island 2
+  myMan[2].move(550); // this is seat 2 on boat near island 2
+  
+  myMonster[1].move(40); //island1: x1
+  myMonster[2].move(70); //island1: x2
+  myMonster[3].move(100); //island1: x3
+  myMan[1].move(130); //island1: x4
+  myMan[2].move(160); // island1: x5
+  myMan[3].move(190);// island1: x6
+
+  myMan[1].move(610); //island2: x1
+  myMan[2].move(640); // island2: x2
+  myMan[3].move(670);// island2: x3
+  myMonster[1].move(700); //island2: x4
+  myMonster[2].move(730); //island2: x5
+  myMonster[3].move(760); //island2: x6
+ */
+  }
+
+function start(){
+    myIsland1= new island(0,300,210,200);
+    myIsland2= new island(590,300,210,200);
+    myBoat=new boat(270,310,120,20,100);
+    myMan[1]=new man(130,275);
+    myMan[2]=new man(160,275);
+    myMan[3]=new man(190,275);
+    myMonster[1]=new monster(40,263);
+    myMonster[2]=new monster(70,263);
+    myMonster[3]=new monster(100,263);
+}
+
+
+class island {
+    constructor(x, y, width, height){
+        this.x=x;
+        this.y=y;
+        this.width=width;
+        this.height=height;
+    }
+
+    display() {
+     push();
+     fill(17,127,135);
+     noStroke();
+     rect(this.x,this.y,this.width,this.height);
+     pop();
+    }
+
+}
+
+class boat {
+    constructor(x, y, width, height, xSpeed){
+        this.x=x;
+        this.y=y;
+        this.width=width;
+        this.height=height;
+        this.xSpeed=xSpeed;
+    }
+
+    display() {
+     push();
+     fill(181,101,29);
+     noStroke();
+     rectMode(CENTER);
+     rect(this.x,this.y,this.width,this.height);
+     pop();
+    }
+ 
+    move(a) {
+     var a;
+     this.x =a;
+    }
+
+    position(){
+        let pos=[x1,x2];
+        x1=(this.width/2)-25;
+        x2=(this.width/2)+25;
+    }
+
+    startBoat(){
+        if (this.x<400){
+            this.x=530;
+        }
+        else this.x=270;
+    }
+}
+function greet(){
+    const name = input.value();
+    greeting.html('hello ' + name + '!');
+    input.value('');
+}
+
+
+class man{
+    constructor(x, y, width, height, colour){
+        this.x=x;
+        this.y=y;
+        this.width=width;
+        this.height=height;
+        this.colour=colour;
+    }
+
+    display(){
+        push();
+        fill (102,105,180);
+        noStroke();
+        rectMode(CENTER);
+        rect(this.x,this.y,15,50);
+        pop();
+    }
+
+    move(a){
+      var a;
+      this.x=a;
+    }
+}
+
+class monster{
+    constructor(x, y, width, height, colour){
+        this.x=x;
+        this.y=y;
+        this.width=width;
+        this.height=height;
+        this.colour=colour;
+    }
+
+    display(){
+        push();
+        fill (252,36,7);
+        noStroke();
+        rectMode(CENTER);
+        rect(this.x,this.y,15,75);
+        pop();
+    }
+
+    move(a){
+     var a;
+     this.x=a;
+    }
+}
+
+function resetGame(){
+  push();
+  myBoat.move(270);//this is pos1 of boat
+  myMonster[1].move(40); //island1: x1
+  myMonster[2].move(70); //island1: x2
+  myMonster[3].move(100); //island1: x3
+  myMan[1].move(130); //island1: x4
+  myMan[2].move(160); // island1: x5
+  myMan[3].move(190);// island1: x6
+  background(100);
+  textSize (72);
+  textAlign (CENTER,CENTER);
+  text("Try Again",400,100);
+  pop();
+}
+
