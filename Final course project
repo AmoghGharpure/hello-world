@@ -1,0 +1,184 @@
+#include <CapacitiveSensor.h>  //Included capacitive sensor library
+#include <Firmata.h>          //Included Firmata protocol to establish communication with MadMapper
+
+CapacitiveSensor cs2 = CapacitiveSensor(3, 4);      //defined 5 capacitive sensors
+CapacitiveSensor cs3 = CapacitiveSensor(5, 6);
+CapacitiveSensor cs4 = CapacitiveSensor(7, 8);
+CapacitiveSensor cs5 = CapacitiveSensor(9, 10);
+CapacitiveSensor cs6 = CapacitiveSensor(11, 12);
+const unsigned long period = 13000;                 // The time for which the idle state will not play after the sensor animation starts
+unsigned long startMillis = 0;
+int val=0;
+
+int curValue2;           //just a variable for setting up a few conditions in the code
+int curValue3;
+int curValue4;
+int curValue5;
+int curValue6;
+int lowPin = 13;        //pin defined to trigger the idle state, HIGH = activate the idle loop, LOW = deactivate the idle loop
+
+String state = "idleloop";        //initialise the code by declaring 'idleloop'
+
+//This is the standard Firmata code for processing digital input and establish serial commnunication, taken from its library ------------------------------------------------------------------------------------------
+byte previousPIN[TOTAL_PORTS];   // PIN means PORT for input
+byte previousPORT[TOTAL_PORTS];
+
+void outputPort(byte portNumber, byte portValue)
+{
+    // only send the data when it changes, otherwise you get too many messages!
+    if (previousPIN[portNumber] != portValue)
+    {
+        Firmata.sendDigitalPort(portNumber, portValue);
+        previousPIN[portNumber] = portValue;
+    }
+}
+
+void setPinModeCallback(byte pin, int mode)
+{
+    if (IS_PIN_DIGITAL(pin))
+    {
+        pinMode(PIN_TO_DIGITAL(pin), mode);
+    }
+}
+
+void digitalWriteCallback(byte port, int value)
+{
+    byte i;
+    byte currentPinValue, previousPinValue;
+
+    if (port < TOTAL_PORTS && value != previousPORT[port])
+    {
+        for (i = 0; i < 8; i++)
+        {
+            currentPinValue = (byte)value & (1 << i);
+            previousPinValue = previousPORT[port] & (1 << i);
+            if (currentPinValue != previousPinValue)
+            {
+                digitalWrite(i + (port * 8), currentPinValue);
+            }
+        }
+        previousPORT[port] = value;
+    }
+}
+//---------------------------------------------------------------------------------------
+
+void setup()
+{
+    Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);    //The next 4 lines of code are part of Firmata setup
+    Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
+    Firmata.attach(SET_PIN_MODE, setPinModeCallback);
+    Firmata.begin(57600);
+    digitalWrite(13,HIGH);        // We start by declaring pin 13 as high to start the idle state 
+}
+
+void idleTimer()                  
+{
+    unsigned long currentMillis = millis();
+    digitalWrite(13,LOW);                  //we declare pin 13 as low and followed by this 'if' loop, it should stay low over 13 seconds which is the defined period
+    if (currentMillis - startMillis >= period){
+    
+       if (state=="animation"){
+        digitalWrite(13,HIGH);
+        Serial.println("highnow");    //this is just to check whether the loop stays for 13 seconds 
+        }
+        Serial.println("highend");   //this is to check if the loop ends and exits the state from animation to ideloop
+        state="idleloop";
+        startMillis = currentMillis;
+    }
+}
+
+void loop()
+{
+
+    int capValue2 = cs2.capacitiveSensor(30);   //5 variables for 5 capacitive sensors
+    int capValue3 = cs3.capacitiveSensor(30);
+    int capValue4 = cs4.capacitiveSensor(30);
+    int capValue5 = cs5.capacitiveSensor(30);
+    int capValue6 = cs6.capacitiveSensor(30);
+  
+
+    if (capValue2 > 200)   // considering the sensitivity of the sensor
+    {
+        curValue2 = 1;
+        digitalWrite(4, HIGH);    //corresponding capacitor pin is made high to trigger the animation 
+        digitalWrite(13,LOW);     //idle loop is turned off
+    }
+    else
+    {
+        digitalWrite(4, LOW);         //corresponding capacitor pin is made low to end the animation
+        curValue2 = 0;
+    }
+
+    if (capValue3 > 200)
+    { 
+        curValue3 = 1;
+        digitalWrite(6, HIGH);     //corresponding capacitor pin is made high to trigger the animation 
+        digitalWrite(13,LOW);     //idle loop is turned off
+    }
+    else
+    {
+        digitalWrite(6, LOW);          //corresponding capacitor pin is made low to end the animation
+        curValue3 = 0;
+    }
+
+    if (capValue4 > 200)
+    { 
+        curValue4 = 1;
+        digitalWrite(8, HIGH);       //corresponding capacitor pin is made high to trigger the animation 
+        digitalWrite(13,LOW);      //idle loop is turned off
+    }
+    else
+    {
+        digitalWrite(8, LOW);      //corresponding capacitor pin is made low to end the animation 
+        curValue4 = 0;
+    }
+
+    if (capValue5 > 200)
+    { 
+        curValue5 = 1;
+        digitalWrite(10, HIGH);      //corresponding capacitor pin is made high to trigger the animation 
+        digitalWrite(13,LOW);    //idle loop is turned off
+    }
+    else
+    {
+        digitalWrite(10, LOW);     //corresponding capacitor pin is made low to end the animation
+        curValue5 = 0;
+    }
+
+    if (capValue6 > 200)
+    { 
+        curValue6 = 1;
+        digitalWrite(12, HIGH);   //corresponding capacitor pin is made high to trigger the animation 
+        digitalWrite(13,LOW);     //idle loop is turned off
+    }
+    else
+    {
+        digitalWrite(12, LOW);      //corresponding capacitor pin is made low to end the animation
+        curValue6 = 0;
+    }
+    if (curValue2 == 1 || curValue3 == 1 || curValue4 == 1 || curValue5== 1 || curValue6 == 1){             //This checks the stage if something is playing,-
+      state="animation";                                                                                   //-ideloop should not be initiated.
+      digitalWrite(13,LOW);
+      startMillis=millis();            
+    }
+
+    if (curValue2 < 1 && curValue3 < 1 && curValue4 < 1 && curValue5 < 1 && curValue6 < 1 && state!="idleloop")   //this checks the stage if nothing is playing,-
+    {                                                                                                              //-idleloop is called by idletimer function.
+       digitalWrite(13, LOW);
+       idleTimer();
+        
+    }
+
+   // The funtions for firmata communication declared before have been called at this stage --------------------------------------------------------------------------
+    byte i;
+
+    for (i = 0; i < TOTAL_PORTS; i++)
+    {
+        outputPort(i, readPort(i, 0xff));
+    }
+
+    while (Firmata.available())
+    {
+        Firmata.processInput();
+    }
+}
